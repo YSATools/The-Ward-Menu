@@ -1,0 +1,20 @@
+<h1>Listing stakes</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+  </tr>
+
+<% for stake in @stakes %>
+  <tr>
+    <td><%=h stake.name %></td>
+    <td><%= link_to 'Show', stake %></td>
+    <td><%= link_to 'Edit', edit_stake_path(stake) %></td>
+    <td><%= link_to 'Destroy', stake, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New stake', new_stake_path %>

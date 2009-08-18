@@ -1,0 +1,32 @@
+#login {
+    float: right;
+    border: solid 1px black;
+    background-color: GhostWhite;
+    padding: 5px;
+    margin: 5px;
+}
+
+#menu {
+    float: left;
+    border: solid 1px black;
+    background-color: GhostWhite;
+    padding: 5px;
+    margin: 5px;
+}
+
+#content {
+    float: left;
+    border: solid 1px black;
+    background-color: GhostWhite;
+    padding: 5px;
+    margin: 5px;
+}
+
+.profile {
+    float: left;
+    text-align: center;
+    border: solid 1px black;
+    background-color: GhostWhite;
+    padding: 5px;
+    margin: 5px;
+}

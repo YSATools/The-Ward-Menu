@@ -1,0 +1,38 @@
+<p>
+  <b>First:</b>
+  <%=h @contact.first %>
+</p>
+
+<p>
+  <b>Last:</b>
+  <%=h @contact.last %>
+</p>
+
+<p>
+  <b>Photo:</b>
+  <%= image_tag("/contacts/get_photo/#{@contact.id}", :alt => "Image") %>
+</p>
+
+<p>
+  <b>Phone:</b>
+  <%=h @contact.phone %>
+</p>
+
+<p>
+  <b>Email:</b>
+  <%=h @contact.email %>
+</p>
+
+<p>
+  <b>Address:</b>
+  <%=h @contact.address %>
+</p>
+
+<p>
+  <b>Zip:</b>
+  <%=h @contact.zip %>
+</p>
+
+
+<%= link_to 'Edit', edit_contact_path(@contact) %> |
+<%= link_to 'Back', contacts_path %>

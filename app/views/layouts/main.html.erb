@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+  <title>Ward Directory Generator - TheWardMenu.com</title>
+  <%= stylesheet_link_tag 'scaffold' %>
+  <%= stylesheet_link_tag 'main' %>
+</head>
+<body>
+
+<p style="color: green"><%= flash[:notice] %></p>
+<p style="color: reb"><%= flash[:error] %></p>
+
+<div id="menu">
+    TODO: link that updates
+</div>
+
+<div id="login">
+    <%= render :partial => @partial_account %> 
+    <%#= render "user_sessions/new" %>
+    <%#= render :controller => "user_sessions", :action => "new" %>
+</div>
+
+<div id="content">
+    <%= yield  %>
+</div>
+
+</body>
+</html>

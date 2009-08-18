@@ -1,0 +1,30 @@
+<h1>Listing contacts</h1>
+<% for contact in @contacts %>
+<div style="
+    float: left;
+    text-align: center;
+    border: solid 1px black;
+    background-color: GhostWhite;
+    height: 275px;
+    width: 150px;
+    padding: 5px;
+    margin: 5px;"
+    >
+<div class="profile">
+    <%=h contact.first %> <%=h contact.last %><br/>
+    <%= image_tag("/contacts/get_photo/#{contact.id}", :alt => "Image") %><br/>
+    <%=h contact.phone %><br/>
+    <%=h contact.email %><br/>
+    <%=h contact.address_line_1 %><br/>
+    <%=h contact.address_line_2 %><br/>
+    <%=h contact.city %>, <%=h contact.state %> <%=h contact.zip %><br/>
+    <%= link_to 'More Info', contact %><br/>
+    <%= link_to 'Edit', edit_contact_path(contact) %><br/>
+    <%= link_to 'Delete', contact, :confirm => 'Are you sure?', :method => :delete %><br/>
+</div>
+</div>
+<% end %>
+
+<br />
+
+<%= link_to 'New contact', new_contact_path %>

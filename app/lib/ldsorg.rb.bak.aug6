@@ -1,0 +1,143 @@
+class Ldsorg
+  attr_accessor :stake_name, :ward_name
+  #Firefox Firebug helps when the source is hard to read.
+  STAKE_NAME_QUERY = '/html/body/table[1]/tr/td/table/tr[6]/td/table/tr/td[5]'
+  WARD_NAME_QUERY = '/html/body/table[1]/tr/td/table/tr[6]/td/table/tr/td[7]'
+  MEMBER_DIR_SEARCH = /member.*directory/i
+  PHOTO_DIR_SEARCH = /photo/i
+  MY_ACCOUNT_SEARCH = /Update Profile/
+  MEMBER_IN_DIR_QUERY = '/html/body/table/tr/td[@class=\'eventsource\']/table/tr[1]'
+
+  def initialize(login, password)
+    require 'mechanize'
+    @agent = WWW::Mechanize.new
+    @agent.user_agent_alias = 'Linux Mozilla'
+    begin
+      @page = @agent.get('http://lds.org/')
+    rescue Exception
+      @msg = "LDS.org is not replying. It may be down for maintenance. If so, come back later."
+    end
+
+    ## Class Variables
+    @login = login
+    @password = password
+  end
+
+  def ldslogin
+    login_page = @agent.get('https://secure.lds.org/units/login')
+    form = login_page.forms.find {|f| f.name = 'loginForm'}             # Find the login form
+    if not (( form.has_field? 'username' ) && ( form.has_field? 'password' ))
+        abort 'LDS.org has been updated and this script has not. It is borken! :('
+    end
+    form['username'] = @login                                           # Enter the username
+    form['password'] = @password                                        # Enter the password
+    @unit_page = form.submit                                            # Try to login
+
+    if /login/i.match(@unit_page.title)                                 # Check for a failed login
+      return false
+    end
+
+    @stake_name = @unit_page.search(STAKE_NAME_QUERY).inner_text.strip
+    @ward_name = @unit_page.search(WARD_NAME_QUERY).inner_text.strip
+    return true
+  end
+
+  def photo_directory
+    # Path is embedded in javascript and therefore unreadable atm
+    base_url = 'https://secure.lds.org'
+    #Assuming that we're still on the ward page and going to the membership dir
+    page = @unit_page.links.find {|l| l.text =~ MEMBER_DIR_SEARCH}.click 
+    link = page.links.find {|l| l.text =~ PHOTO_DIR_SEARCH}
+    photo_dir_url = base_url + /(\/.*\.html)/i.match(link.uri.to_s)[1]
+    page = @agent.get(photo_dir_url)
+    #records = []
+    page.search(MEMBER_IN_DIR_QUERY).each do |tr|
+        record = {}
+        record[:last] = tr.at('td[1]/table/tr[1]/td[1]').inner_text.strip
+        record[:phone] = tr.at('td[1]/table/tr[1]/td[2]').inner_text.strip
+        # found funky chars (some sort of tab?) with string.inspect
+        name = tr.at('td[1]/table/tr[2]/td[1]').inner_text.gsub!(/[\302\240]/, '').strip
+        if name.index(' ')
+            record[:first] = name[0..name.index(' ')-1]
+            #record[:middle] = name[name.index(' ')+1..name.length]
+        else
+            record[:first] = name
+            #record[:middle] = nil
+        end
+        record[:email] = tr.at('td[1]/table/tr[2]/td[2]').inner_text.strip
+        #address is separated by newline
+        record[:address_line_1] = tr.at('td[@width=\'25%\']').inner_text.strip.split(/\n/)[0].strip
+        record[:address_line_2] = tr.at('td[@width=\'25%\']').inner_text.strip.split(/\n/)[1].strip
+        record[:ward_photo] = nil
+        if img = tr.at('img') # No, I don't mean == here
+            record[:ward_photo] = @agent.get_file(base_url + img['src'])
+        end
+        print record[:first] + " " + record[:last] + "\n"
+        #todo from_directory / custom marker
+        #records << record
+        record[:ward_name] = @ward_name
+        if not @contact = Contact.new(record) # for TheWardMenu.com, shared class
+          abort 'fail on Contact.new: ' + YAML::dump(@contact.errors)
+        end
+        if not @contact.save
+          abort 'fail on @contact.save: ' + YAML::dump(@contact.errors)
+        end
+    end
+    require 'generator'
+    g = Generator.new do |g|
+      for record in records
+        g.yield record
+      end
+      g.yield nil
+    end
+  end
+
+  def user_profile
+    profile_page = @unit_page.links.find {|l| l.text =~ MY_ACCOUNT_SEARCH}.click
+    form = profile_page.forms.find {|f| f.name = 'profileForm'}
+    last_query = 'html/body/table[2]/tr[1]/td[2]/table/tr[2]/td[2]/table/tr[1]/td[1]/table/tr/td[1]/form/table/tr[1]/td[2]/span'
+
+    record = {}
+    record[:first] = form['prefName'].strip
+    record[:last] = profile_page.search(last_query).inner_text.strip
+    record[:email] = form['email'].strip
+    # TODO BUG don't assume that first_last_email is unique, as it isn't (i.e. a Jr with a family e-mail)
+    
+    if not contact = Ward.find_by_name(@ward_name).contacts.find(:first, 
+      :conditions => { 
+        :first => record[:first], 
+        :last => record[:last]
+      })
+      contact = Contact.new(record)
+      contact.ward = Ward.find_by_name(@ward_name)
+      if not contact.save
+        YAML::dump(record)
+        abort "Crying tears of a rapper. You've got hurt feelings: " #+ YAML::dump(contact.errors)
+      end
+    end
+    if not user = User.find_by_login(@login)
+        abort "The day after my birthday is not my birthday mum. I've got hurt feelings: " #+ YAML::dump(user.errors)
+    end
+    user.contact = contact
+    user.save
+  end
+
+  private
+    def photo_directory
+      
+    end
+
+    def create_generator
+      if not @records
+        photo_directory
+      end
+      require 'generator'
+      @gen = Generator.new do |g|
+        for record in @records
+          g.yield record
+        end
+        g.yield nil
+      end
+      @records = nil
+    end
+end

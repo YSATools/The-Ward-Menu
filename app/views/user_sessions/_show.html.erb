@@ -1,0 +1,21 @@
+<p>
+<% @user = current_user %> 
+<%= @user.contact.ward.stake.name %><br/>
+<ul>
+  <li><strong><%= @user.contact.ward.name %></strong></li>
+<% for ward in @user.contact.ward.stake.wards 
+    if ward != @user.contact.ward %>
+  <li><%= ward.name %></li>
+<%
+  end
+end %>
+</ul>
+<br/>
+<br/>
+LDS Account: <%= @user.login %>
+<%= link_to('logout', :action => 'destroy', :method => :delete) %>
+<br/>
+<%= @user.contact.first %> <%= @user.contact.last %><br/>
+<%= @user.contact.email %><br/>
+</p>
+

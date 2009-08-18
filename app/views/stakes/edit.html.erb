@@ -1,0 +1,16 @@
+<h1>Editing stake</h1>
+
+<% form_for(@stake) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :name %><br />
+    <%= f.text_field :name %>
+  </p>
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @stake %> |
+<%= link_to 'Back', stakes_path %>

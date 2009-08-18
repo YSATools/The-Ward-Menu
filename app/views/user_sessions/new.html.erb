@@ -1,0 +1,37 @@
+<!-- div id="login_pane" -->
+    <h1>Stake and Ward Web Site Sign In</h1>
+    <% if flash[:notice] %>
+      <div class="notice"><%= flash[:notice] %></div>
+    <% end %>
+    <% if flash[:error] %>
+      <div class="error"><%= flash[:error] %></div>
+    <% end %>
+
+    <img style="float:left" src="images/ward.jpg">
+    <div id="credentials" style="float:left">
+    <% remote_form_for @user_session, :url => user_session_path do |f| %>
+        <%= f.error_messages %>
+        
+        <%= f.label 'LDS Account' %><br />
+        <%= f.text_field :login %><br/>
+        
+        <%= f.label :password %><br />
+        <%= f.password_field :password %><br/>
+        
+        <%#= f.hidden :remember_me, :value => 'true' %>
+        
+        <%= submit_tag "Get Ward Directory from LDS.org... (takes about 3 minutes)"  %>
+      <% end %>
+    </div>
+    <div id="tips" style="clear:both">
+      <p>You must login through the official church website in order to access the photo directory.
+      <br/>Your password will not be stored on this site.</p>
+      <p>Having trouble? Check to see that you can log in to
+      <a href="https://secure.lds.org/units/login">your ward web site</a>
+    normally before complaining here.</p>
+
+      <p>No LDS Account? See your ward clerk!</p>
+
+      <p>Programmer TODO: use javascript encryption to send password 'safely' over a clear-text connection!</p>
+    </div>
+<!-- /div -->
