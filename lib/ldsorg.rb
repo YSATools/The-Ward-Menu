@@ -112,6 +112,10 @@ class Ldsorg
   end
 
   def member_photo(url)
+    @anonymous = @agent.get_file('http://www.clker.com/cliparts/0/4/3/4/12198090302006169125female%20silhouette.svg.med.png') unless @anonymous
+    if not url
+      return @anonymous
+    end
     return @agent.get_file(PHOTO_BASE_URL + url)
   end
 
