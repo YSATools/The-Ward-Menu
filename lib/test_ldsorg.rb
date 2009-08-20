@@ -15,20 +15,22 @@ class TestLdsorg
     types = @ldsorg.calling_types
     types.each do |t|
       puts t
-      callings = @ldsorg.callings_for_type(t)
-      callings.each { |c|
+      tuples = @ldsorg.callings_for_type(t)
+      tuples.each { |t|
+        calling_name = t[:calling_name]
+        c = t[:contact]
         print "\n\n"
-        print "calling: ", c[:calling], "\n"
-        print "first:   ", c[:first], "\n"
-        print "second:  ", c[:second], "\n"
-        print "third:   ", c[:third], "\n"
-        print "last:    ", c[:last], "\n"
-        print "addr_1:  ", c[:address_line_1], "\n"
-        print "addr_2:  ", c[:address_line_2], "\n"
-        print "city:    ", c[:city], "\n"
-        print "state:   ", c[:state], "\n"
-        print "zip:     ", c[:zip], "\n"
-        print "phone:   ", c[:phone], "\n"
+        print "calling: ", calling_name, "\n"
+        print "\tfirst:   ", c[:first], "\n"
+        print "\tsecond:  ", c[:second], "\n"
+        print "\tthird:   ", c[:third], "\n"
+        print "\tlast:    ", c[:last], "\n"
+        print "\taddr_1:  ", c[:address_line_1], "\n"
+        print "\taddr_2:  ", c[:address_line_2], "\n"
+        print "\tcity:    ", c[:city], "\n"
+        print "\tstate:   ", c[:state], "\n"
+        print "\tzip:     ", c[:zip], "\n"
+        print "\tphone:   ", c[:phone], "\n"
       }
     end
   end

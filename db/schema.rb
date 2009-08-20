@@ -25,7 +25,7 @@ ActiveRecord::Schema.define(:version => 13) do
 
   create_table "callings", :force => true do |t|
     t.string   "name"
-    t.integer  "callingtypes_id"
+    t.integer  "calling_type_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -37,7 +37,8 @@ ActiveRecord::Schema.define(:version => 13) do
 
   create_table "contacts", :force => true do |t|
     t.string   "first"
-    t.string   "middle"
+    t.string   "second"
+    t.string   "third"
     t.string   "last"
     t.string   "phone"
     t.string   "email"

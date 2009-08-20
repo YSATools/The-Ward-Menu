@@ -1,24 +1,13 @@
 class ContactsController < ApplicationController
   def pdf
     require 'studentpdf' # TODO change name
-    bishopric_calling_ids = []
 
-    # TODO moved to named scope
-    Calling.find( :all, :conditions => ["name LIKE ?", "%bishop%"] ).each do |c|
-      bishopric_calling_ids << c.id
-    end
-
-    bishopric = Contact.find(:all, :conditions => ["calling_id IN (?)", bishopric_calling_ids])
-
-    leadership = Contact.find(:all, 
-      :conditions => {
-        ["calling_id NOT IN (?)", bishopric_calling_ids], 
-        "calling_id IS NOT NULL"})
-
-    membership = Contact.find(:all, :conditions => ["calling_id NOT IN (?)", bishopric_calling_ids])
+    @bishopric = bishopric
+    @leadership = leadership
+    @membership = members
     
     dir = DirectoryPDF.new
-    dir.add_title(@current_user.ward.name, nil) #no photo
+    dir.add_title(@current_user.contact.ward.name, nil) #no photo
 
     dir.new_page(:number => false)
     dir.new_list(:title => 'Ward Leadership', :per_page => :fit)
@@ -77,7 +66,9 @@ class ContactsController < ApplicationController
   # GET /contacts
   # GET /contacts.xml
   def index
-    @contacts = Contact.find(:all, :order => 'address_group_id, address_line_1, address_line_2', :conditions => ["ward_id IN (?)", current_user.contact.ward.stake.wards])
+    @bishopric = bishopric
+    @leadership = leadership
+    @contacts = members 
 
     respond_to do |format|
       format.html # index.html.erb
@@ -157,4 +148,20 @@ class ContactsController < ApplicationController
       format.xml  { head :ok }
     end
   end
+
+  private
+    #TODO move to model
+    def bishopric
+      return Contact.find(:all, :conditions => ["callings.name LIKE ? AND ward_id = ?", 'Bishop%', current_user.contact.ward], :include => [:callings, :photo], :order => 'callings.name') unless @bishopric
+    end
+
+    def leadership
+      return Calling.find(:all, :conditions => ["callings.name NOT LIKE ? AND wards.id = ?", 'Bishop%', current_user.contact.ward], :include => [{:contacts => :ward}, :calling_type], :order => :calling_type_id) unless @leadership 
+      #return Contact.find(:all, :conditions => ["callings.name IS NOT NULL AND callings.name NOT LIKE ? AND ward_id = ?", 'Bishop%', current_user.contact.ward], :include => [:callings]) unless @leadership 
+    end
+
+    def members
+      #return (current_user.contact.ward.find(:include => [:contacts => :photo], :order => ['contact.address_line_1, contact.address_line_2, contact.first']).contacts - bishopric) unless @contacts
+      return (Contact.find(:all, :conditions => {:ward_id => current_user.contact.ward}, :include => [:photo], :order => ['address_line_1, address_line_2, first']) - @bishopric) unless @contacts
+    end
 end

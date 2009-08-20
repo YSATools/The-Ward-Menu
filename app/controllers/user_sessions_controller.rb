@@ -1,4 +1,5 @@
 class UserSessionsController < ApplicationController
+  require 'ldsorg'
   skip_before_filter :require_user
   # before_filter :require_no_user, :only => [:new, :create]
   before_filter :require_user, :only => :destroy
@@ -13,7 +14,6 @@ class UserSessionsController < ApplicationController
 
   def create
     # Login
-    require 'ldsorg'
     @ldsorg = Ldsorg.new(params[:user_session][:login], params[:user_session][:password])
     if not @ldsorg.ldslogin
       flash[:notice] = "Login failed!"
@@ -74,19 +74,36 @@ class UserSessionsController < ApplicationController
       abort 'User has no contact' unless @user.contact
       @ward.updated_at = Time.now and @ward.save
 
-      spawn do # TODO Queue w/ 10 minute limit
+      #spawn do # TODO Queue w/ 10 minute limit
         for contact in contacts
           if not contact.photo.data
             next
           end
           contact.photo.data = @ldsorg.member_photo(contact.photo.data)
           contact.photo.save
+          contact.save
           @ward.updated_at = Time.now
           @ward.save
         end
         @ward.completed_at = Time.now
         @ward.save
-      end 
+      #end
+
+      #spawn do
+        @ldsorg.calling_types.each do |t|
+          type = CallingType.find_or_create_by_name(t)
+          @ldsorg.callings_for_type(t).each do |tuple|
+            calling = Calling.find_or_create_by_name(tuple[:calling_name])
+            #if not type.callings.include? calling
+              type.callings << calling
+              type.save
+            #end
+            contact = Contact.find(:first, :conditions => tuple[:contact])
+            contact.callings << calling
+            contact.save
+          end
+        end
+      #end
     end
 
     redirect_to :controller => 'home', :action => 'index'

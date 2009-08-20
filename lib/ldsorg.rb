@@ -147,8 +147,9 @@ class Ldsorg
       @leadership_page = @unit_page.links.find {|l| l.text =~ /Leadership Directory/}.click unless @leadership_page
       page = @leadership_page.links.find {|l| l.text =~ /#{type}/}.click #TODO unless page.find(type)
       page.search(CALLINGS_QUERY).each do |tr| 
+        calling_name = tr.at('td[1]').inner_text.strip.sub(/(.*):/, '\1')
+
         record = {}
-        record[:calling] = tr.at('td[1]').inner_text.strip.sub(/(.*):/, '\1')
         #TODO BUG I don't know why <img> turns into \302\240 or if that's just
         #a bug in the string class on my system
         #TODO look for link to determine has/not has email
@@ -203,7 +204,12 @@ class Ldsorg
         end
 
         record[:phone] = tr.at('td[3]').inner_text.strip
-        @callings[type] << record
+
+        tuple = {}
+        tuple[:calling_name] = calling_name
+        tuple[:contact] = record
+
+        @callings[type] << tuple
       end
     end
     return @callings[type]

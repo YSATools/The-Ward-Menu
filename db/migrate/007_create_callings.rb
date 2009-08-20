@@ -3,7 +3,7 @@ class CreateCallings < ActiveRecord::Migration
     create_table :callings do |t|
       t.string :name
 
-      t.references :callingtypes
+      t.references :calling_type
       t.timestamps
     end
   end

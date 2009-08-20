@@ -1,3 +1,3 @@
 class CallingType < ActiveRecord::Base
-  has_many :calling_types
+  has_many :callings
 end

@@ -2,7 +2,7 @@
 <% @user = current_user %> 
 <%= @user.contact.ward.stake.name %><br/>
 <ul>
-  <li><strong><%= @user.contact.ward.name %></strong></li>
+  <li><strong><%= link_to @user.contact.ward.name, :controller => 'contacts', :action => 'index' %></strong></li>
 <% for ward in @user.contact.ward.stake.wards 
     if ward != @user.contact.ward %>
   <li><%= ward.name %></li>
