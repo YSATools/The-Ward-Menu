@@ -61,7 +61,13 @@
     >
 <div class="profile">
     <%=h contact.first %> <%=h contact.last %><br/>
-    <%= image_tag("/contacts/get_photo/#{contact.id}", :alt => "Image") %><br/>
+    <% if contact.photo.data
+          path = "/contacts/get_photo/#{contact.id}"
+        else
+          path = "/images/anonymous.jpg"
+        end
+    %>
+    <%= image_tag(path, :alt => "Image", options={:style=>'height: 135px'}) %><br/>
     <%=h contact.phone %><br/>
     <%=h contact.email %><br/>
     <%=h contact.address_line_1 %><br/>

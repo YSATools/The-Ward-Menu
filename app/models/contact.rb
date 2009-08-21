@@ -1,7 +1,6 @@
 class Contact < ActiveRecord::Base
   #http://groups.google.com/group/authlogic/browse_thread/thread/dd844e966bd2687f?hl=en
   cattr_accessor :current_user
-  #default_scope :conditions => ["ward_id IN (?)", @@current_user.contact.ward.stake.wards]
   if @@current_user
     default_scope :conditions => ["ward_id IN (?)", @@current_user.contact.ward.stake.wards]
     abort 'the dynamic default scoping works'
@@ -16,9 +15,8 @@ class Contact < ActiveRecord::Base
   belongs_to :ward
   # TODO
   #belongs_to :stake, :through => :ward
-  belongs_to :user
-  #has_one :user
-  has_one :photo
+  belongs_to :user #has_one :user
+  has_one :photo, :dependent => :destroy
   has_and_belongs_to_many :callings
 
   def current_scope(current_user)
