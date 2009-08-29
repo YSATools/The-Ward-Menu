@@ -1,7 +1,4 @@
 <h1>Listing contacts</h1>
-<p><strong><%= link_to current_user.contact.ward.stake.name, :controller => 'home', :action => 'index' %></strong></p>
-<p><strong><%= link_to 'Download this Ward Directory as PDF', :controller => 'pdf', :action => 'index' %></strong></p>
-<p>TODO: Slug</p>
 <% for contact in @bishopric %>
 <div style="
     float: left;

@@ -1,41 +1,4 @@
 class ContactsController < ApplicationController
-  def pdf
-    require 'studentpdf' # TODO change name
-
-    @bishopric = bishopric
-    @leadership = leadership
-    @membership = members
-    
-    dir = DirectoryPDF.new
-    dir.add_title(@current_user.contact.ward.name, nil) #no photo
-
-    dir.new_page(:number => false)
-    dir.new_list(:title => 'Ward Leadership', :per_page => :fit)
-    leadership.each { |leader| dir.add_record(leader) }
-
-    dir.new_page(:number => true)
-    dir.new_block(:title => 'Bishopric', :per_page => 3)
-    #dir.add_records(bishopric)
-    bishopric.each { |bishop| dir.add_record(bishop) }
-
-    dir.new_page(:number => true)
-    dir.index_records()
-    # TODO sort apts
-    for complex in AddressGroup.find(:all)
-      dir.add_title(:number => true)
-      dir.new_page(:number => true)
-      for apartment in complex.apartments
-        dir.new_block(:side_title => complex.name, :per_page => 6) #TODO knows when to pagebreak
-        apartment.members.each { |member| dir.add_record(member) }
-      end
-    end
-    
-    dir.new_page(:number => false)
-    dir.new_list(:use_index => true, :per_page => 50)
-
-    send_data dir.render, :filename => filename, :type => "application/pdf" 
-  end
-
   def get_photo
     @image_data = Contact.find(params[:id], :conditions => ["ward_id IN (?)", current_user.contact.ward.stake.wards]).photo
     @image = @image_data.data
@@ -72,6 +35,16 @@ class ContactsController < ApplicationController
 
     respond_to do |format|
       format.html # index.html.erb
+      format.xml  { render :xml => @contacts }
+    end
+  end
+
+  def index
+    @bishopric = bishopric
+    @leadership = leadership
+    @contacts = members 
+    respond_to do |format|
+      format.html # debug.html.erb
       format.xml  { render :xml => @contacts }
     end
   end
@@ -162,6 +135,13 @@ class ContactsController < ApplicationController
 
     def members
       #return (current_user.contact.ward.find(:include => [:contacts => :photo], :order => ['contact.address_line_1, contact.address_line_2, contact.first']).contacts - bishopric) unless @contacts
-      return (Contact.find(:all, :conditions => {:ward_id => current_user.contact.ward}, :include => [:photo], :order => ['address_line_1, address_line_2, first']) - @bishopric) unless @contacts
+      return (Contact.find(:all, :conditions => {:ward_id => current_user.contact.ward}, :include => [:photo, :address_group], :order => ['address_group_id, address_line_1, address_line_2, first']) - @bishopric) unless @contacts
+    end
+
+    def same_complex?
+      puts 'todo'
+    end
+    def same_apartment?
+      puts 'todo'
     end
 end

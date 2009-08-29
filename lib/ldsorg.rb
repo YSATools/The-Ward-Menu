@@ -222,10 +222,15 @@ class Ldsorg
   private
     def city_state_zip(line)
       city, state, zip = nil, nil, nil
+      return city, state, zip unless line
       parts = line.split(',')
+      return city, state, zip unless parts[0]
       city = parts[0].strip
-      parts2 = parts[1].strip.split(' ')
+      return city, state, zip unless parts[1]
+      parts2 = parts[1].strip.split(' ') 
+      return city, state, zip unless parts2[0]
       state = parts2[0]
+      return city, state, zip unless parts2[1]
       zip = parts2[1] unless 2 != parts2.length
       return city, state, zip
     end
@@ -263,7 +268,9 @@ class Ldsorg
           end
           record[:email] = tr.at('td[1]/table/tr[2]/td[2]').inner_text.strip
           #address is separated by newline #TODO line 1/2 are on 1 and city/state are on 2
-          full_address = tr.at('td[@width=\'25%\']').inner_text.strip.split(/\n/)
+          full_address = tr.at('td[@width=\'25%\']').inner_text.strip.split(/\s*\n\s*/)
+          #full_address = tr.at('td[@width=\'25%\']').inner_text.strip.split(/\n/)
+          #puts full_address.inspect
           case full_address.length
             when 0
               record[:address_line_1] = nil
@@ -283,7 +290,7 @@ class Ldsorg
               record[:address_line_2] = full_address[1]
               record[:city], record[:state], record[:zip] = city_state_zip(full_address[2])
             else
-              abort('Death by more-than-3-line-address')
+              abort 'Death by more-than-3-line-address: ' + full_address.inspect
           end
 
           if record[:address_line_1]
@@ -294,7 +301,6 @@ class Ldsorg
               record[:address_line_2] = '#' + lines[1].strip
             end
           end
-
           record[:ward_photo] = nil
           if img = tr.at('img') 
             record[:ward_photo] = img['src']

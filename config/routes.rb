@@ -5,6 +5,9 @@ ActionController::Routing::Routes.draw do |map|
 
   map.resources :contacts
   map.resources :wards, :has_many => :users, :has_many => :contacts
+  map.resources :pdf
+  map.connect 'pdf/:stake', :controller => 'pdf', :action => 'stake_directory'
+  map.connect 'pdf/:stake/:ward', :controller => 'pdf', :action => 'ward_directory'
   #map.resources :users
 
   # The priority is based upon order of creation: first created -> highest priority.

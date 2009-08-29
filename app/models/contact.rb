@@ -1,6 +1,7 @@
 class Contact < ActiveRecord::Base
   #http://groups.google.com/group/authlogic/browse_thread/thread/dd844e966bd2687f?hl=en
   cattr_accessor :current_user
+  attr_accessor :page_number
   if @@current_user
     default_scope :conditions => ["ward_id IN (?)", @@current_user.contact.ward.stake.wards]
     abort 'the dynamic default scoping works'
@@ -47,4 +48,8 @@ class Contact < ActiveRecord::Base
     photo.save
     self.photo = photo
   end
+
+  #def address_line_2
+  #  return @address_line_2 ? @address_line_2 : ''
+  #end
 end

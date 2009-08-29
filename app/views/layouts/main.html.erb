@@ -13,18 +13,10 @@
 <p style="color: green"><%= flash[:notice] %></p>
 <p style="color: reb"><%= flash[:error] %></p>
 
-<div id="menu">
-    TODO: link that updates
-</div>
-
 <div id="login">
     <%= render :partial => @partial_account %> 
     <%#= render "user_sessions/new" %>
     <%#= render :controller => "user_sessions", :action => "new" %>
-</div>
-
-<div id="content">
-    <%= yield  %>
 </div>
 
 </body>
