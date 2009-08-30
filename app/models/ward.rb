@@ -11,13 +11,22 @@ class Ward < ActiveRecord::Base
   #TODO
   #has_many :wards, :through => :stake
 
+  def empty?
+    return contacts.nil? ? true : contacts.empty?
+  end
   def stale?
-    if not self.completed_at
-      return true
-    end
-    if not self.updated_at
-      return true
-    end
-    return self.updated_at < 72.hours.ago
+    return !updated_at.nil? && updated_at < 72.hours.ago
+  end
+  def complete?
+    return !completed_at.nil? && completed_at > 30.days.ago
+  end
+  def partial?
+    return !empty? && !complete?
+  end
+  def drop_contacts
+    updated_at = nil
+    completed_at = nil
+    contacts.each {|c| c.destroy}
+    save
   end
 end

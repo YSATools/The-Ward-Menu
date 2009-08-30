@@ -3,7 +3,7 @@ class TestLdsorg
   require 'ldsorg'
 
   def initialize
-    #@ldsorg = Ldsorg.new('user', 'secret')
+    @ldsorg = Ldsorg.new('user', 'secret')
     abort 'no login' unless @ldsorg.ldslogin
   end
 
@@ -51,4 +51,4 @@ end
 test = TestLdsorg.new
 test.test_user_profile
 #test.test_directory_next
-test.test_callings_and_types
+#test.test_callings_and_types

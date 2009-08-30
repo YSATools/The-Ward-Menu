@@ -1,6 +1,7 @@
 <p>
 <% @user = current_user %> 
 <%= @user.contact.ward.stake.name %><br/>
+<%= @user.contact.ward.stake.name %><br/>
 <ul>
   <li><strong><%= link_to @user.contact.ward.name, :controller => 'contacts', :action => 'index' %></strong></li>
 <% for ward in @user.contact.ward.stake.wards 

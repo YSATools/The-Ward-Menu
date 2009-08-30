@@ -120,16 +120,23 @@ class Ldsorg
   end
 
   def user_profile
+    return @user_profile unless not @user_profile
     profile_page = @unit_page.links.find {|l| l.text =~ MY_ACCOUNT_SEARCH}.click
     form = profile_page.forms.find {|f| f.name = 'profileForm'}
     last_query = 'html/body/table[2]/tr[1]/td[2]/table/tr[2]/td[2]/table/tr[1]/td[1]/table/tr/td[1]/form/table/tr[1]/td[2]/span'
 
-    record = {}
-    record[:first] = form['prefName'].strip
-    record[:last] = profile_page.search(last_query).inner_text.strip
-    record[:email] = form['email'].strip
+    first_second = form['prefName'].strip.split('\s+')
+    second = first_second[1] ? first_second[1] : nil
+    third_last = profile_page.search(last_query).inner_text.strip.split('\s+')
+    @user_profile = {
+      :first => first_second[0],
+      :second => first_second[1] ? first_second[1] : nil,
+      :third => third_last[1] ? third_last[0] : nil,
+      :last => third_last[1] ? third_last[1] : third_last[0],
+      :email => form['email'].strip,
+    }
 
-    return record
+    return @user_profile
   end
 
   def calling_types

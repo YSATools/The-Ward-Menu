@@ -21,30 +21,62 @@ class UserSessionsController < ApplicationController
       render :action => :new
       return
     end
-    # TODO in Ldsorg.rb
-    # If they haven't upgraded to an LDS Account this won't mean much
+    # TODO in Ldsorg.rb / here: Notify if they have a valid old account, but need to upgrade to LDSAccount
     flash[:notice] = "Login successful!"
-    @user = User.find_or_create_by_login(params[:user_session][:login])
-    @user_session = UserSession.create(@user, true)
-    Contact.current_user = current_user
 
-    # Build relationships
+    # Stake & Wards
     @stake = Stake.find_or_create_by_name(@ldsorg.stake_name)
     @ldsorg.wards_in_stake.each do |ward|
       w = Ward.find_or_create_by_name(ward)
       w.stake = @stake
       w.save
     end
+    @stake.save
+
+    # Ward & Members
+    i = 0
+    ward = Ward.find_by_name(@ldsorg.ward_name)
+    while ward.partial? do
+      if ward.updated_at < 15.seconds.ago || i > 300
+        #log timed out
+        ward.drop_contacts
+        break
+      end
+      i += 2
+      sleep 2
+      ward = Ward.find_by_name(@ldsorg.ward_name)
+    end
     @ward = Ward.find_by_name(@ldsorg.ward_name)
-    puts @ldsorg.ward_name
-    if @ward.stale? or params[:user_session][:force_download]
-      @ward.destroy
-      @ward = Ward.new({:name => @ldsorg.ward_name})
+    if @ward.stale? #or params[:user_session][:force_download]
+      # NOTE if I change this to @ward.destroy, I have to relink the new one to each user
+      @ward.drop_contacts
+      #@ward.destroy
+      #@ward = Ward.new({:name => @ldsorg.ward_name})
+      #@ward.stake = @stake
+      #@ward.save # update time is after directory uploads
+    end
+    if @ward.empty? # if the ward is empty of contacts
       download_directory
     end
-    @ward.stake = @stake
-    @ward.save
 
+    # User & Member
+    # TODO BUG anomaly: First Last Jr w/ Family E-Mail
+    contact = Contact.find(:first, :conditions => @ldsorg.user_profile)
+    user = User.find_or_create_by_login(params[:user_session][:login])
+    contact.user = user
+    contact.save
+
+    # Double Check
+    #assert user.contact
+    #assert user.contact.ward
+    #assert user.contact.ward.contacts
+    #assert user.contact.ward.stake
+    #assert user.contact.ward.stake.wards
+    flash[:notice] = "Login successful! + Ward Partial: " + @ward.partial?.to_s
+
+    # All Systems Go!
+    @user_session = UserSession.create(user, true)
+    Contact.current_user = current_user
     redirect_to :controller => 'home', :action => 'index'
   end
   
@@ -75,37 +107,25 @@ class UserSessionsController < ApplicationController
     # update rather than delete?
 
     @ldsorg.directory_init #takes about 10 seconds in links2
-    puts @ldsorg.directory_length
-    me = Contact.new(@ldsorg.user_profile)
+    #@ldsorg.directory_length
     contacts = []
     while record = @ldsorg.directory_next
       abort contact.errors unless contact = Contact.new(record)
-      contact.save
-      if contact.address_line_2 && contact.address_line_1
-        # TODO scope to ward?
-        if !contact.address_line_1
-          abort 'error: line_2 without line_1 for ' + contact.first + ' ' + contact.last
-        end
-        contact.address_group = AddressGroup.find_or_create_by_name(contact.address_line_1)
-        contact.address_group.save
-      else
-        contact.address_group = AddressGroup.find_or_create_by_name('default')
-      end
+      name = contact.address_line_1 ? contact.address_line_1 : 'default'
+      contact.address_group = AddressGroup.find_or_create_by_name(name)
       contact.ward = @ward
-      # TODO BUG anomaly: First Last Jr w/ Family E-Mail
-      if (contact.first == me.first) && (contact.last == me.last) && (contact.email == me.email)
-        contact.user = @user
-      end
+      contact.save
       abort "A member from the directory could not be saved..." +
         " I guess they don't make it to Celestial glory..." unless contact.save
       contacts << contact
     end
-    abort 'User has no contact' unless @user.contact
     @ward.updated_at = Time.now and @ward.save
 
     #spawn do # TODO Queue w/ 10 minute limit
+    # Link Ward Members to their photos
       for contact in contacts
         if not contact.photo.data
+          #TODO contact.photo.data = File.open('images/anonymous.png').read
           next
         end
         contact.photo.data = @ldsorg.member_photo(contact.photo.data)
@@ -119,6 +139,7 @@ class UserSessionsController < ApplicationController
     #end
 
     #spawn do
+    # Link Ward Members to their Callings
       @ldsorg.calling_types.each do |t|
         type = CallingType.find_or_create_by_name(t)
         @ldsorg.callings_for_type(t).each do |tuple|
@@ -128,8 +149,12 @@ class UserSessionsController < ApplicationController
             type.save
           #end
           contact = Contact.find(:first, :conditions => tuple[:contact])
-          contact.callings << calling
-          contact.save
+          if not contact
+            logger.error tuple.inspect
+          else
+            contact.callings << calling
+            contact.save
+          end
         end
       end
     #end
