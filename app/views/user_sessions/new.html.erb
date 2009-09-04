@@ -1,5 +1,5 @@
 <!-- div id="login_pane" -->
-    <h1>Stake and Ward Web Site Sign In</h1>
+    <h1>The Ward Menu - LDS Ward Directory PDF Generator</h1>
     <% if flash[:notice] %>
       <div class="notice"><%= flash[:notice] %></div>
     <% end %>
@@ -12,7 +12,7 @@
     <% remote_form_for @user_session, :url => user_session_path do |f| %>
         <%= f.error_messages %>
         
-        <%= f.label 'LDS Account' %><br />
+        <%= f.label 'LDSAccount' %><br />
         <%= f.text_field :login %><br/>
         
         <%= f.label :password %><br />
@@ -20,18 +20,47 @@
         
         <%#= f.hidden :remember_me, :value => 'true' %>
         
-        <%= submit_tag "Get Ward Directory from LDS.org... (takes about 3 minutes)"  %>
+        <%= submit_tag "Get Ward Directory from LDS.org... (takes 60 to 90 seconds)"  %>
       <% end %>
     </div>
     <div id="tips" style="clear:both">
-      <p>You must login through the official church website in order to access the photo directory.
-      <br/>Your password will not be stored on this site.</p>
-      <p>Having trouble? Check to see that you can log in to
-      <a href="https://secure.lds.org/units/login">your ward web site</a>
-    normally before complaining here.</p>
+      <h3>How to use this site:</h3>
+      <ul>
+        <li>Contact your ward clerk to register an LDSAccount</li>
+        <li>Make sure that you can log in to <a href="https://secure.lds.org/units/login">your ward web site</a>
+on LDS.org through "Stake and Ward Web Sites"</li>
+        <li>Log in to The Ward Menu with your LDSAccount (your password will not be stored)</li>
+        <li>Wait as we access your ward directory</li>
+        <li>Download the final PDF, ready for printing</li>
+      </ul>
 
-      <p>No LDS Account? See your ward clerk!</p>
+      <h3>What you get:</h3>
+      <ul>
+        <li>Bishopric Photo Page</li>
+        <li>Leadership Index</li>
+        <li>Member Photo Directory</li>
+        <li>Member Index</li>
+      </ul>
 
-      <p>Programmer TODO: use javascript encryption to send password 'safely' over a clear-text connection!</p>
+      <h3>Feedback:</h3>
+      <p>This is still very much a work in progress. By Sept 18th I'll be open to feedback. Until then, things don't work entirely and I'm okay with that.</p>
+
+      <h3>Bugs:</h3>
+      <ul>
+        <li>Bishopric photos are too large</li>
+        <li>Page numbers are missing</li>
+        <li>Edits don't work</li>
+        <li>The format only works well for student single wards in apartment complexes</li>
+      </ul>
+ 
+      <h3>Todo:</h3>
+      <p>use ssl and or javascript encryption to send password 'safely'</p>
+
+      <h3>Credits:</h3>
+      Many thanks to:
+      <ul>
+        <li>Ruby on Rails</li>
+        <li>FreeDNS</li>
+      </ul>
     </div>
 <!-- /div -->
