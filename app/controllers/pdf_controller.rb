@@ -18,7 +18,7 @@ class PdfController < ApplicationController
     dir.section({:columns => 1, :rows =>3, :left_padding => 10})
     for person in @bishopric
       # Potrait
-      dir.add_image_element person.photo.data, 0, 0
+      dir.add_image_element person.photo.data, 0.9
 
       # First & Last Name
       text_to_add = person.first + ' '
@@ -38,15 +38,20 @@ class PdfController < ApplicationController
       # E-mail
       dir.add_text_element person.email, font='Times-Roman', size=10
 
-      #TODO person.page = dir.page_number
+      person.page_number = dir.page_number
       #TODO puts 'info does not fit in cell' unless dir.top >= dir.cell_height
       dir.next_column 
     end
+    dir.next_page
 
     #Leadership Table
     dir.section({:columns => 10, :rows =>20, :left_padding => 10})
     leadership_table.render_on(dir.pdf)
-    dir.pdf.start_new_page
+    dir.next_column
+    dir.next_row
+    dir.next_column
+    dir.next_page
+    #dir.pdf.start_new_page
 
     @membership = members
     complexes = []
@@ -63,6 +68,7 @@ class PdfController < ApplicationController
     #end
 
     dir.section({:columns => 2, :rows =>3, :left_padding => 10})
+    dir.print_page_number = true
 
     complex_name = @membership.first.address_group.name ? @membership.first.address_group.name : 'Error_Group'
     apartment_name = 'Make it be new' #complex_name + (@membership.first.address_line_2 ? @membership.first.address_line_2 : '')
@@ -83,7 +89,7 @@ class PdfController < ApplicationController
  
       # Person
       # Potrait
-      dir.add_image_element person.photo.data, 0, 0
+      dir.add_image_element person.photo.data
 
       # First & Last Name
       text_to_add = person.first + ' '
@@ -98,15 +104,16 @@ class PdfController < ApplicationController
       # E-mail
       dir.add_text_element person.email, font='Times-Roman', size=10
 
-      #TODO person.page = dir.page_number
+      person.page_number = dir.page_number
       #TODO puts 'info does not fit in cell' unless dir.top >= dir.cell_height
       dir.next_column
     end
     
     dir.next_page
+    dir.print_page_number = false
     membership_table().render_on(dir.pdf)
 
-    dir.save('WardDir')
+    #dir.save('WardDir')
     send_data dir.pdf.render, :filename => 'Ward_Directory.pdf', :type => "application/pdf" 
   end
 
@@ -180,13 +187,13 @@ class PdfController < ApplicationController
         tab.position      = :center
 
         data = []
-        members.sort{|a,b| a.first <=> b.first}
-        for contact in members
+        @membership.sort{|a,b| a.first <=> b.first}
+        for contact in @membership
           data << {
                     "name" => "#{contact.first} #{contact.last}",
                     "phone" => contact.phone,
                     "email" => contact.email,
-                    #"page" => contact.page,
+                    "page" => contact.page_number.to_s,
                   }
         end
         tab.data.replace data
@@ -206,8 +213,11 @@ class PdfController < ApplicationController
     end
 
     def members
-      #return (current_user.contact.ward.find(:include => [:contacts => :photo], :order => ['contact.address_line_1, contact.address_line_2, contact.first']).contacts - bishopric) unless @contacts
-      return (Contact.find(:all, :conditions => {:ward_id => current_user.contact.ward}, :include => [:photo, :address_group], :order => ['address_group_id, address_line_1, address_line_2, first']) - @bishopric) unless @contacts
+      #return (current_user.contact.ward.find(:include => [:contacts => :photo], :order => ['contact.address_line_1, contact.address_line_2, contact.first']).contacts - bishopric) unless @membership
+      if not @membership
+        @membership = Contact.find(:all, :conditions => {:ward_id => current_user.contact.ward}, :include => [:photo, :address_group], :order => ['address_group_id, address_line_1, address_line_2, first']) - @bishopric
+      end
+      return @membership
     end
 
     def same_complex?

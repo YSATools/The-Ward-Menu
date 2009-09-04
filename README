@@ -1,14 +1,4 @@
-TODO -- tonight!
-Mechanize 'Leadership Directory'
-Mechanize '%Stake%' > Ward > Membership Directory
-Re-mechanize ward-dir to stake>ward>dir ???
-
-ruby script/generate model Address name:string address_group:belongs_to
-ruby script/generate model AddressGroup name:string address:has_many
-
-SSL
-http://www.buildingwebapps.com/articles/6401-using-ssl-in-rails-applications
-
+Your rights are listed in the files LICENSE and COPYING
 
 == Welcome to Rails
 

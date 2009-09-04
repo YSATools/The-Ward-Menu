@@ -13,6 +13,7 @@ class DirectoryPDF
   require 'rubygems'
   require 'ftools'
 
+  attr_accessor :print_page_number
   attr_reader :pdf, :column_number, :row_number, :page_number
 
   TEXT_FONT = 12
@@ -28,6 +29,8 @@ class DirectoryPDF
     @column_number = 0
     @row_number = 0
     @page_number = 0
+
+    @print_page_number = false
   end
 
   def left_boundary
@@ -91,7 +94,11 @@ class DirectoryPDF
   end
 
   def next_page
-    return unless (top_boundary != @current_row && left_boundary != @current_column)
+    return unless (top_boundary != @current_row || left_boundary != @current_column)
+    if @print_page_number
+      # TODO center the text
+		  @pdf.add_text left_boundary, bottom_boundary, @page_number.to_s
+    end
     @pdf.start_new_page
     @current_column = left_boundary
     @current_row = top_boundary
@@ -124,7 +131,7 @@ class DirectoryPDF
     @pdf.add_vertical_text left_boundary, @current_row, text.upcase
   end
   
-  def add_image_element(image, boo, hoo)
+  def add_image_element(image, ratio=1)
     if not image
       @top -= @max_pic_height
       return
@@ -139,7 +146,7 @@ class DirectoryPDF
 
     height_ratio = @max_pic_height.to_f / image_info.height
     width_ratio = @max_pic_width.to_f / image_info.width
-    scale = height_ratio <= width_ratio ? height_ratio : width_ratio
+    scale = (height_ratio <= width_ratio ? height_ratio : width_ratio) * ratio
     image_width = image_info.width * scale
     image_height = image_info.height * scale
     image_x = @left + (@cell_width - image_width).to_f / 2

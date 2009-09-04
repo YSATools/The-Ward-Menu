@@ -1,0 +1,8 @@
+TODO -- tonight!
+ruby script/generate model Address name:string address_group:belongs_to
+ruby script/generate model AddressGroup name:string address:has_many
+
+SSL
+http://www.buildingwebapps.com/articles/6401-using-ssl-in-rails-applications
+
+
