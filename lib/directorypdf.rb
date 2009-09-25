@@ -96,8 +96,9 @@ class DirectoryPDF
   def next_page
     return unless (top_boundary != @current_row || left_boundary != @current_column)
     if @print_page_number
-      # TODO center the text
-		  @pdf.add_text left_boundary, bottom_boundary, @page_number.to_s
+      text = @page_number.to_s
+		  text_left = @pdf.absolute_left_margin + (width - @pdf.text_line_width(text)).to_f / 2
+		  @pdf.add_text text_left, bottom_boundary, text
     end
     @pdf.start_new_page
     @current_column = left_boundary

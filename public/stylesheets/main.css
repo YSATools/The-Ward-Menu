@@ -1,5 +1,17 @@
 #login {
-    float: right;
+    float: left;
+    clear: both;
+    width: 90%;
+    border: solid 1px black;
+    background-color: GhostWhite;
+    padding: 5px;
+    margin: 5px;
+}
+
+#footer {
+    float: left;
+    clear: both;
+    width: 90%;
     border: solid 1px black;
     background-color: GhostWhite;
     padding: 5px;

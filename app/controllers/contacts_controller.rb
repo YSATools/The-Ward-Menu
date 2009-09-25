@@ -36,6 +36,8 @@ class ContactsController < ApplicationController
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => @contacts }
+      format.json  { render :json => @contacts }
+      format.js
     end
   end
 
@@ -46,6 +48,7 @@ class ContactsController < ApplicationController
     respond_to do |format|
       format.html # debug.html.erb
       format.xml  { render :xml => @contacts }
+      format.js
     end
   end
 
@@ -57,6 +60,7 @@ class ContactsController < ApplicationController
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @contact }
+      format.js
     end
   end
 
@@ -68,6 +72,7 @@ class ContactsController < ApplicationController
     respond_to do |format|
       format.html # new.html.erb
       format.xml  { render :xml => @contact }
+      format.js
     end
   end
 
@@ -86,9 +91,11 @@ class ContactsController < ApplicationController
         flash[:notice] = 'Contact was successfully created.'
         format.html { redirect_to(@contact) }
         format.xml  { render :xml => @contact, :status => :created, :location => @contact }
+        format.js
       else
         format.html { render :action => "new" }
         format.xml  { render :xml => @contact.errors, :status => :unprocessable_entity }
+        format.js
       end
     end
   end

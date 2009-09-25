@@ -5,7 +5,7 @@ require 'string_extensions' #int'l #AJ-patch
 class ApplicationController < ActionController::Base
   helper :all # include all helpers, all the time
   helper_method :current_user_session, :current_user
-  #filter_parameter_logging :password, :password_confirmation
+  filter_parameter_logging :password, :password_confirmation
   before_filter :require_user, :current_user_in_contact
 
   # See ActionController::RequestForgeryProtection for details

@@ -17,8 +17,10 @@ class PdfController < ApplicationController
     @bishopric = bishopric
     dir.section({:columns => 1, :rows =>3, :left_padding => 10})
     for person in @bishopric
+      dir.add_text_element " "
+
       # Potrait
-      dir.add_image_element person.photo.data, 0.9
+      dir.add_image_element person.photo.data, 0.8
 
       # First & Last Name
       text_to_add = person.first + ' '
@@ -45,12 +47,12 @@ class PdfController < ApplicationController
     dir.next_page
 
     #Leadership Table
-    dir.section({:columns => 10, :rows =>20, :left_padding => 10})
-    leadership_table.render_on(dir.pdf)
-    dir.next_column
-    dir.next_row
-    dir.next_column
-    dir.next_page
+    #dir.section({:columns => 10, :rows =>20, :left_padding => 10})
+    #leadership_table.render_on(dir.pdf)
+    #dir.next_column
+    #dir.next_row
+    #dir.next_column
+    #dir.next_page
     #dir.pdf.start_new_page
 
     @membership = members
@@ -76,14 +78,14 @@ class PdfController < ApplicationController
       # Complex
       if complex_name != person.address_group.name
         complex_name = person.address_group.name
-        dir.next_row #TODO 
+        #dir.next_page #TODO 
       end
       
       # Apartment
       new_apartment_name = complex_name + (person.address_line_2 ? person.address_line_2 : '')
       if apartment_name != new_apartment_name
         apartment_name = new_apartment_name
-        dir.next_row 
+        dir.next_page 
         dir.add_vertical_text_element new_apartment_name, font='Courier-Bold', size=10
       end
  
@@ -187,7 +189,7 @@ class PdfController < ApplicationController
         tab.position      = :center
 
         data = []
-        @membership.sort{|a,b| a.first <=> b.first}
+        @membership.sort! {|a,b| a.first <=> b.first}
         for contact in @membership
           data << {
                     "name" => "#{contact.first} #{contact.last}",

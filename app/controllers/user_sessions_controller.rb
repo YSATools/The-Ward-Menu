@@ -66,13 +66,7 @@ class UserSessionsController < ApplicationController
     contact.user = user
     contact.save
 
-    # Double Check
-    #assert user.contact
-    #assert user.contact.ward
-    #assert user.contact.ward.contacts
-    #assert user.contact.ward.stake
-    #assert user.contact.ward.stake.wards
-    flash[:notice] = "Login successful! + Ward Partial: " + @ward.partial?.to_s
+    flash[:notice] = "Login successful!"
 
     # All Systems Go!
     @user_session = UserSession.create(user, true)

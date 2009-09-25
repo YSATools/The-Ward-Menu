@@ -1,3 +1,4 @@
+<%= javascript_tag "var AUTH_TOKEN = #{form_authenticity_token.inspect};" if protect_against_forgery? %>
 <h1>Listing contacts</h1>
 <p><strong><%= link_to current_user.contact.ward.stake.name, :controller => 'home', :action => 'index' %></strong></p>
 <p><strong><%= link_to 'Download this Ward Directory as PDF', :controller => 'pdf', :action => 'index' %></strong></p>
@@ -8,21 +9,25 @@
     text-align: center;
     border: solid 1px black;
     background-color: GhostWhite;
-    height: 275px;
-    width: 150px;
+    height: 350px;
+    width: 225px;
     padding: 5px;
     margin: 5px;"
     >
 <div class="profile">
-    <%=h contact.first %> <%=h contact.last %><br/>
-    <%= image_tag("/contacts/get_photo/#{contact.id}", :alt => "Image") %><br/>
-    <%=h contact.phone %><br/>
-    <%=h contact.email %><br/>
-    <%=h contact.address_line_1 %><br/>
-    <%=h contact.address_line_2 %><br/>
-    <%=h contact.city %>, <%=h contact.state %> <%=h contact.zip %><br/>
-    <%= link_to 'More Info', contact %><br/>
-    <%= link_to 'Edit', edit_contact_path(contact) %><br/>
+  <% remote_form_for(contact) do |f| %>
+    <%= f.error_messages %>
+
+      <%= f.text_field :first %> <%= f.text_field :last %><br/>
+      <%= image_tag("/contacts/get_photo/#{contact.id}", :alt => "Image") %><br/>
+      <%= f.file_field :image_file %><br/>
+      <%= f.text_field :phone %><br/>
+      <%= f.text_field :email %><br/>
+      <%= f.text_field :address_line_1 %><br/>
+      <%= f.text_field :address_line_2 %><br/>
+      <%= f.text_field :city %>, <%= f.text_field :state %> <%= f.text_field :zip %><br/>
+      <%= f.submit "Update" %><br/>
+  <% end %>
     <%= link_to 'Delete', contact, :confirm => 'Are you sure?', :method => :delete %><br/>
 </div>
 </div>
