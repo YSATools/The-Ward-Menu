@@ -1,33 +1,36 @@
-class TestLdsorg
-  require 'rubygems'
-  require 'ldsorg'
+#!/usr/bin/env ruby
+require 'test/unit'
+class TC_MyTest < Test::Unit::TestCase
 
-  def initialize
-    @ldsorg = Ldsorg.new('user', 'secret')
-    abort 'no login' unless @ldsorg.ldslogin
-  end
+  def test_all
+    puts "LDSAccount: "
+    user = gets.chomp
+    puts "Passphrase: "
+    pass = gets.chomp
 
-  def test_user_profile
-    @ldsorg.user_profile.each {|p| print p, "\n"}
-  end
+    require 'ldsorg'
+    @ldsorg = Ldsorg.new
+    abort 'no login' unless @ldsorg.ldslogin user, pass
 
-  def test_directory_next 
-    @ldsorg.directory_init
-    while c = @ldsorg.directory_next
-      #print c, "\n"
-      #print c.inspect
-      if c[:address_line_2]
-        puts c[:address_line_2].inspect
-        #abort 'stop'
-      end
-    end
-  end
+  #test_user_profile
+    pp @ldsorg.stake.name
+    pp @ldsorg.ward.name
 
-  def test_callings_and_types
-    types = @ldsorg.calling_types
+    pp @ldsorg.user_profile
+
+  #test_wards
+    @ldsorg.wards
+
+    @ldsorg.ward
+    @ldsorg.ward.page
+    pp @ldsorg.ward.directory
+    abort "stop"
+  #test_callings_and_types
+    types = @ldsorg.ward.calling_types
+    pp types
     types.each do |t|
       puts t
-      tuples = @ldsorg.callings_for_type(t)
+      tuples = @ldsorg.ward.callings_for_type(t)
       tuples.each { |t|
         calling_name = t[:calling_name]
         c = t[:contact]
@@ -48,7 +51,5 @@ class TestLdsorg
   end
 end
 
-test = TestLdsorg.new
-test.test_user_profile
-#test.test_directory_next
-#test.test_callings_and_types
+require 'test/unit/ui/console/testrunner'
+Test::Unit::UI::Console::TestRunner.run(TC_MyTest)
