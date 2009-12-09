@@ -11,7 +11,6 @@ class Ldsorg
   def initialize
     @agent = WWW::Mechanize.new
     @agent.user_agent_alias = 'Linux Mozilla'
-    true
   end
 
   def ldslogin(ldsaccount, password)
@@ -56,46 +55,30 @@ class Ldsorg
   def wards
     if not @wards
       @wards = {}
-      names = []
       stake.page.search(WARDS_IN_STAKE_QUERY).each do |a|
         name = a.inner_text.strip
         name_s = Regexp.escape(name)
         link = stake.page.links.find {|l| l.text =~ /.*#{name_s}.*/ }
+
+        ward = {}
         ward = Ldsward.new name, link
         if ward.name == @ward.name
           @ward = ward
         end
-        @wards[ward.name] = ward
+        @wards[name] = ward
+        puts "ward name:" + @wards[name].name
       end
-      #names.each do |name|
-      #end
     end
     @wards
   end
 
-  #def ward_names
-  #  if not @ward_names
-  #    @ward_names = []
-  #    wards.each do |ward|
-  #      @ward_names << ward.name
-  #    end
-  #  end
-  #  @ward_names 
-  #end
-
-  #def directory(ward_name = @ward.name)
-  #  raise "Ward '#{ward_name}' not found in '#{@stake.name}'" unless wards[name_name]
-  #  ward = wards[ward_name]
-  #  ward.directory
-  #end
-
-  #def directories
-  #  directories = []
-  #  wards.each do |ward|
-  #    directories << ward.directory
-  #  end
-  #  directories
-  #end
+  def directories
+    directories = []
+    wards.each_pair do |name, ward|
+      directories += ward.directory
+    end
+    directories
+  end
 
   def user_profile
     return @user_profile unless not @user_profile

@@ -14,8 +14,8 @@ class UserSessionsController < ApplicationController
 
   def create
     # Login
-    @ldsorg = Ldsorg.new(params[:user_session][:login], params[:user_session][:password])
-    if not @ldsorg.ldslogin
+    @ldsorg = Ldsorg.new
+    if not @ldsorg.ldslogin params[:user_session][:login], params[:user_session][:password]
       flash[:notice] = "Login failed!"
       self.new
       render :action => :new
@@ -25,9 +25,9 @@ class UserSessionsController < ApplicationController
     flash[:notice] = "Login successful!"
 
     # Stake & Wards
-    @stake = Stake.find_or_create_by_name(@ldsorg.stake_name)
-    @ldsorg.wards_in_stake.each do |ward|
-      w = Ward.find_or_create_by_name(ward)
+    @stake = Stake.find_or_create_by_name(@ldsorg.stake.name)
+    @ldsorg.wards.each_pair do |name, ward|
+      w = Ward.find_or_create_by_name(name)
       w.stake = @stake
       w.save
     end
@@ -35,18 +35,18 @@ class UserSessionsController < ApplicationController
 
     # Ward & Members
     i = 0
-    ward = Ward.find_by_name(@ldsorg.ward_name)
+    ward = Ward.find_by_name(@ldsorg.ward.name)
     while ward.partial? do
-      if ward.updated_at < 15.seconds.ago || i > 300
+      if ward.updated_at 5.minutes.ago || i > 300 #15 seconds was the original
         #log timed out
         ward.drop_contacts
         break
       end
       i += 2
       sleep 2
-      ward = Ward.find_by_name(@ldsorg.ward_name)
+      ward = Ward.find_by_name(@ldsorg.ward.name)
     end
-    @ward = Ward.find_by_name(@ldsorg.ward_name)
+    @ward = Ward.find_by_name(@ldsorg.ward.name)
     if @ward.stale? #or params[:user_session][:force_download]
       # NOTE if I change this to @ward.destroy, I have to relink the new one to each user
       @ward.drop_contacts
@@ -100,10 +100,11 @@ class UserSessionsController < ApplicationController
     # TODO don't delete custom additions
     # update rather than delete?
 
-    @ldsorg.directory_init #takes about 10 seconds in links2
+    records = @ldsorg.directories #takes about 10 seconds in links2
     #@ldsorg.directory_length
     contacts = []
-    while record = @ldsorg.directory_next
+    #while record = @ldsorg.directory_next
+    records.each do |record|
       abort contact.errors unless contact = Contact.new(record)
       name = contact.address_line_1 ? contact.address_line_1 : 'default'
       contact.address_group = AddressGroup.find_or_create_by_name(name)
@@ -122,7 +123,7 @@ class UserSessionsController < ApplicationController
           #TODO contact.photo.data = File.open('images/anonymous.png').read
           next
         end
-        contact.photo.data = @ldsorg.member_photo(contact.photo.data)
+        contact.photo.data = @ldsorg.ward.member_photo(contact.photo.data)
         contact.photo.save
         contact.save
         @ward.updated_at = Time.now
@@ -134,9 +135,9 @@ class UserSessionsController < ApplicationController
 
     #spawn do
     # Link Ward Members to their Callings
-      @ldsorg.calling_types.each do |t|
+      @ldsorg.ward.calling_types.each do |t|
         type = CallingType.find_or_create_by_name(t)
-        @ldsorg.callings_for_type(t).each do |tuple|
+        @ldsorg.ward.callings_for_type(t).each do |tuple|
           calling = Calling.find_or_create_by_name(tuple[:calling_name])
           #if not type.callings.include? calling
             type.callings << calling

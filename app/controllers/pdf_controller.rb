@@ -13,9 +13,9 @@ class PdfController < ApplicationController
 
   def ward_directory
     dir = DirectoryPDF.new
-
     @bishopric = bishopric
     dir.section({:columns => 1, :rows =>3, :left_padding => 10})
+=begin
     for person in @bishopric
       dir.add_text_element " "
 
@@ -45,7 +45,10 @@ class PdfController < ApplicationController
       dir.next_column 
     end
     dir.next_page
-
+=end
+      dir.add_text_element ' '
+      dir.next_column 
+    dir.next_page
     #Leadership Table
     #dir.section({:columns => 10, :rows =>20, :left_padding => 10})
     #leadership_table.render_on(dir.pdf)
@@ -82,7 +85,7 @@ class PdfController < ApplicationController
       end
       
       # Apartment
-      new_apartment_name = complex_name + (person.address_line_2 ? person.address_line_2 : '')
+      new_apartment_name = complex_name + (person.address_line_2 ? ' ' + person.address_line_2 : '')
       if apartment_name != new_apartment_name
         apartment_name = new_apartment_name
         dir.next_page 
@@ -191,8 +194,11 @@ class PdfController < ApplicationController
         data = []
         @membership.sort! {|a,b| a.first <=> b.first}
         for contact in @membership
+          first = contact.first + (contact.second ? ' ' + contact.second : '')
+          last = (contact.third ? contact.third + ' ' : '') + contact.last
+
           data << {
-                    "name" => "#{contact.first} #{contact.last}",
+                    "name" => "#{first} #{last}",
                     "phone" => contact.phone,
                     "email" => contact.email,
                     "page" => contact.page_number.to_s,

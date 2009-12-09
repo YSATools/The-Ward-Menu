@@ -29,7 +29,6 @@ class Ldsward
     #@agent = agent
     @name = name
     @link = link
-    true
   end
 
   def page
@@ -123,7 +122,7 @@ class Ldsward
 
         record[:ward_photo] = nil
         if img = tr.at('img') 
-          record[:ward_photo_url] = img['src']
+          record[:ward_photo] = img['src']
         end
 
         @records << record
@@ -140,7 +139,7 @@ class Ldsward
 
   def photo_directory
     directory.each do |record_no_photo|
-      record_no_photo[:ward_photo] = member_photo(record_no_photo[:ward_photo_url])
+      record_no_photo[:ward_photo] = member_photo(record_no_photo[:ward_photo])
     end 
   end
 
@@ -157,17 +156,17 @@ class Ldsward
   #   but gives us no count
 
   def directory_length(ward_name = @ward[:name])
-    return @stake[:wards][ward_name][:records].length
+    directory.length
   end
 
   def member_photo(url)
-    if not @mystery_pic
-      @mystery_pic = open('public/mystery_pic.jpg', "rb") {|io| io.read }
-    end
-    if not url
-      return @mystery_pic
-    end
-    return @@agent.get_file(PHOTO_BASE_URL + url)
+    #if not @mystery_pic # TODO
+    #  @mystery_pic = open('public/mystery_pic.jpg', "rb") {|io| io.read }
+    #end
+    #if not url
+    #  return @mystery_pic
+    #end
+    @@agent.get_file(PHOTO_BASE_URL + url) if url
   end
 
   # TODO does each ward need one of these? I think it's just the first?

@@ -6,11 +6,11 @@ class TC_MyTest < Test::Unit::TestCase
     puts "LDSAccount: "
     user = gets.chomp
     puts "Passphrase: "
-    pass = gets.chomp
+    token = gets.chomp
 
     require 'ldsorg'
     @ldsorg = Ldsorg.new
-    abort 'no login' unless @ldsorg.ldslogin user, pass
+    abort 'no login' unless @ldsorg.ldslogin user, token
 
   #test_user_profile
     pp @ldsorg.stake.name
@@ -19,8 +19,12 @@ class TC_MyTest < Test::Unit::TestCase
     pp @ldsorg.user_profile
 
   #test_wards
-    @ldsorg.wards
-
+    @ldsorg.wards.each_pair do |name, ward|
+      puts "ward: "
+      pp ward.name
+      #pp w
+    end
+abort "done"
     @ldsorg.ward
     @ldsorg.ward.page
     pp @ldsorg.ward.directory
